@@ -31,9 +31,17 @@ sequenceDiagram
             else Ресторан підтверджує замовлення
                 restaurant->>order: confirm()
                 order-->>restaurant: Статус Accepted
+                opt Повторно надійшло підтвердження
+                    restaurant->>order: confirm()
+                    order-->>restaurant: Ігнорувати повтор, стан Accepted не змінюється
+                end
                 restaurant->>order: Подія початку приготування
                 Note over restaurant,order: Після окремої події початку замовлення переходить у Preparing
                 restaurant->>restaurant: markReady(order)
+                opt Повторно надійшла подія готовності
+                    restaurant->>restaurant: markReady(order)
+                    restaurant-->>restaurant: Ігнорувати повтор, стан ReadyForPickup не змінюється
+                end
                 restaurant->>delivery: Delivery(id, order, mapping)
                 alt Кур'єра не вдалося призначити
                     delivery-->>customer: AwaitingCourier — кур'єра ще не призначено і повідомити замовника про затримку
@@ -45,6 +53,10 @@ sequenceDiagram
                         delivery-->>customer: PickupFailed — замовлення не доставлено
                     else Кур'єр забирає замовлення
                         courier->>delivery: start()
+                        opt Повторно надійшла подія забору
+                            courier->>delivery: start()
+                            delivery-->>courier: Ігнорувати повтор, стан InTransit не змінюється
+                        end
                         delivery->>mapping: getRouteDetails(origin, destination)
                         Note over delivery,mapping: Маршрут імітується, зовнішнього з'єднання немає
                         mapping-->>delivery: Імітовані відомості маршруту
@@ -61,12 +73,20 @@ sequenceDiagram
                                 Note over courier,delivery: Завершення можливе лише після окремого відновлення доставки
                                 courier->>delivery: complete()
                                 delivery-->>customer: Delivered
+                                opt Повторно надійшло завершення доставки
+                                    courier->>delivery: complete()
+                                    delivery-->>courier: Ігнорувати повтор, стан Delivered не змінюється
+                                end
                             else Перешкоду не усунуто
                                 delivery-->>customer: Залишити доставку незавершеною, не надсилати Delivered
                             end
                         else Перешкод немає
                             courier->>delivery: complete()
                             delivery-->>customer: Delivered
+                            opt Повторно надійшло завершення доставки
+                                courier->>delivery: complete()
+                                delivery-->>courier: Ігнорувати повтор, стан Delivered не змінюється
+                            end
                         end
                     end
                 end
