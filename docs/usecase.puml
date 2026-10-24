@@ -1,0 +1,49 @@
+@startuml
+left to right direction
+
+actor "Замовник" as Customer
+actor "Кур'єр" as Courier
+actor "Ресторан-партнер" as Restaurant
+
+rectangle "Служба доставки їжі" {
+  usecase "Формування кошика" as UC_Basket
+  usecase "Вибір часу доставки" as UC_Time
+  usecase "Оформлення замовлення" as UC_Order
+  usecase "Опрацювання замовлення рестораном" as UC_Restaurant
+  usecase "Підтвердження або відхилення" as UC_Decision
+  usecase "Приготування та позначення готовності" as UC_Prepare
+  usecase "Забір замовлення" as UC_Pickup
+  usecase "Виконання та відстеження доставки" as UC_Delivery
+  usecase "Оновлення статусу доставки" as UC_Tracking
+  usecase "Оцінювання доставки та відгук" as UC_Review
+}
+
+Customer -- UC_Basket
+Customer -- UC_Time
+Customer -- UC_Order
+Customer -- UC_Delivery
+Customer -- UC_Review
+Restaurant -- UC_Restaurant
+Restaurant -- UC_Decision
+Restaurant -- UC_Prepare
+Courier -- UC_Pickup
+Courier -- UC_Delivery
+Courier -- UC_Tracking
+
+UC_Order ..> UC_Basket : <<include>>
+UC_Order ..> UC_Time : <<include>>
+UC_Restaurant ..> UC_Decision : <<include>>
+UC_Restaurant ..> UC_Prepare : <<include>>
+UC_Delivery ..> UC_Pickup : <<include>>
+UC_Delivery ..> UC_Tracking : <<include>>
+UC_Review ..> UC_Delivery : <<extend>>\nлише після Delivered
+
+note bottom of UC_Order
+  Порожній кошик або недоступний час
+  не дають оформити замовлення.
+end note
+
+note bottom of UC_Review
+  Одна оцінка 1–5 на завершену доставку.
+end note
+@enduml

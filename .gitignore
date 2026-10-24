@@ -1,0 +1,14 @@
+# Java
+target/
+*.class
+*.jar
+.gradle/
+build/
+
+# Тимчасові та локальні файли
+.DS_Store
+Thumbs.db
+*.tmp
+*.swp
+.vscode/
+.idea/

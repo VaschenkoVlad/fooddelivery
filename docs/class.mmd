@@ -1,0 +1,100 @@
+classDiagram
+    class IDeliveryStatus {
+        <<interface>>
+        +getDeliveryStatus() String
+    }
+
+    class DeliveryParticipant {
+        <<abstract>>
+        -id: String
+        -name: String
+        +DeliveryParticipant(id: String, name: String)
+        +getId() String
+        +getDeliveryStatus() String
+    }
+
+    class Customer {
+        -address: String
+        +Customer(id: String, name: String, address: String)
+        +placeOrder(order: Order) void
+        +submitReview(delivery: Delivery, rating: int, comment: String) Review
+        +getDeliveryStatus() String
+    }
+
+    class Courier {
+        -availability: boolean
+        +Courier(id: String, name: String, availability: boolean)
+        +acceptDelivery(delivery: Delivery) void
+        +updateDeliveryStatus(status: String) void
+        +getDeliveryStatus() String
+    }
+
+    class PartnerRestaurant {
+        +PartnerRestaurant(id: String, name: String)
+        +confirmOrder(order: Order) void
+        +rejectOrder(order: Order, reason: String) void
+        +markReady(order: Order) void
+        +getDeliveryStatus() String
+    }
+
+    class Order {
+        -id: String
+        -requestedDeliveryTime: String
+        -status: String
+        -items: BasketItem[]
+        +Order(id: String, customer: Customer, restaurant: PartnerRestaurant, requestedDeliveryTime: String)
+        +addItem(item: BasketItem) Order
+        +addItem(dishName: String, quantity: int) Order
+        +submit() void
+        +confirm() void
+        +reject(reason: String) void
+    }
+
+    class BasketItem {
+        -dishName: String
+        -quantity: int
+        -unitPrice: decimal
+        +BasketItem(dishName: String, quantity: int, unitPrice: decimal)
+    }
+
+    class Delivery {
+        -status: String
+        -trackingDetails: String
+        +Delivery(id: String, order: Order, mappingService: MappingService)
+        +start() void
+        +updateStatus(status: String) void
+        +complete() void
+        +reportObstacle(reason: String) void
+    }
+
+    class MappingService {
+        +MappingService()
+        +getRouteDetails(origin: String, destination: String) String
+    }
+
+    class Review {
+        -rating: int
+        -comment: String
+        +Review(id: String, customer: Customer, delivery: Delivery, rating: int, comment: String)
+    }
+
+    DeliveryParticipant <|-- Customer
+    DeliveryParticipant <|-- Courier
+    DeliveryParticipant <|-- PartnerRestaurant
+    Customer ..|> IDeliveryStatus
+    Courier ..|> IDeliveryStatus
+    PartnerRestaurant ..|> IDeliveryStatus
+
+    Order "1" *-- "1..*" BasketItem : містить
+    Customer "1" --> "0..*" Order : оформлює
+    PartnerRestaurant "1" --> "0..*" Order : опрацьовує
+    Order "1" --> "1" Delivery : має доставку
+    Delivery "0..*" --> "1" Courier : призначено
+    Delivery ..> MappingService : використовує
+    Review "0..*" --> "1" Customer : автор
+    Review "0..1" --> "1" Delivery : оцінює
+
+    note for DeliveryParticipant "getId() є final. Customer, Courier і PartnerRestaurant перевизначають getDeliveryStatus()."
+    note for Order "addItem(item) та addItem(dishName, quantity) — перевантажені варіанти. Кошик не порожній; час доставки має бути доступним."
+    note for Review "Одна оцінка 1–5 на доставку; відгук дозволений лише після Delivered."
+    note for Delivery "MappingService передається через конструктор; маршрут і зовнішні дії імітуються."

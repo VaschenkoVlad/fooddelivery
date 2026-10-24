@@ -1,0 +1,50 @@
+sequenceDiagram
+    autonumber
+    actor customer as Customer
+    participant order as Order
+    participant restaurant as PartnerRestaurant
+    participant courier as Courier
+    participant delivery as Delivery
+    participant mapping as MappingService
+    participant review as Review
+
+    customer->>order: Order(id, customer, restaurant, requestedDeliveryTime)
+    customer->>order: addItem(dishName, quantity)
+    customer->>order: submit()
+    alt Кошик порожній або час недоступний
+        order-->>customer: Відмовити в оформленні та пояснити причину
+    else Кошик і час коректні
+        order->>restaurant: confirmOrder(order)
+        alt Ресторан відхиляє замовлення
+            restaurant->>order: reject(reason)
+            order-->>customer: Повідомити про відхилення
+        else Ресторан підтверджує замовлення
+            restaurant->>order: confirm()
+            Note over restaurant,order: Замовлення переходить у Preparing
+            restaurant->>restaurant: markReady(order)
+            restaurant->>delivery: Delivery(id, order, mapping)
+            courier->>courier: acceptDelivery(delivery)
+            alt Кур'єр не може забрати замовлення
+                courier->>delivery: reportObstacle(reason)
+                delivery-->>customer: PickupFailed — замовлення не доставлено
+            else Кур'єр забирає замовлення
+                courier->>delivery: start()
+                delivery->>mapping: getRouteDetails(origin, destination)
+                Note over delivery,mapping: Маршрут імітується, зовнішнього з'єднання немає
+                mapping-->>delivery: Імітовані відомості маршруту
+                loop Оновлення перебігу доставки
+                    courier->>delivery: updateDeliveryStatus(status)
+                    delivery->>delivery: updateStatus(status)
+                    delivery-->>customer: Поточний статус для відстеження
+                end
+                opt Перешкода під час доставки
+                    courier->>delivery: reportObstacle(reason)
+                    delivery-->>customer: Повідомити про перешкоду та не позначати як Delivered
+                end
+                courier->>delivery: complete()
+                delivery-->>customer: Delivered
+                customer->>review: Review(id, customer, delivery, rating, comment)
+                Note over customer,review: Відгук лише після Delivered, оцінка — ціле число від 1 до 5
+            end
+        end
+    end

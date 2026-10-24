@@ -1,0 +1,34 @@
+stateDiagram-v2
+    direction LR
+    [*] --> Draft: створити замовлення
+
+    Draft --> Submitted: кошик не порожній і час доступний / submit()
+    Draft --> Cancelled: скасувати замовлення
+    Draft --> Draft: порожній кошик або недоступний час / показати пояснення
+
+    Submitted --> Accepted: ресторан підтвердив / confirm()
+    Submitted --> Rejected: ресторан відхилив / reject(reason)
+    Submitted --> Cancelled: замовник скасував
+
+    Accepted --> Preparing: ресторан почав приготування
+    Preparing --> ReadyForPickup: ресторан позначив замовлення готовим
+    ReadyForPickup --> PickupFailed: кур'єр не може забрати / reportObstacle(reason)
+    ReadyForPickup --> InTransit: кур'єр забрав / start()
+    InTransit --> InTransit: оновити статус / updateStatus(status)
+    InTransit --> InTransit: перешкода / повідомити замовника, не завершувати доставку
+    InTransit --> Delivered: замовлення передано замовнику / complete()
+
+    Delivered --> [*]
+    Rejected --> [*]
+    Cancelled --> [*]
+    PickupFailed --> [*]
+
+    note right of Delivered
+        Лише після Delivered дозволено
+        один Review з оцінкою 1–5.
+    end note
+
+    note right of PickupFailed
+        Не є успішною доставкою;
+        Review створити не можна.
+    end note
