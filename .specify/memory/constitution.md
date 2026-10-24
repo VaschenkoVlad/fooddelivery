@@ -1,50 +1,84 @@
-# [PROJECT_NAME] Constitution
-<!-- Example: Spec Constitution, TaskFlow Constitution, etc. -->
+<!--
+Sync Impact Report
+Version change: не встановлено → 1.0.0
+Modified principles: попередній документ містив лише шаблонні плейсхолдери; визначено
+  8 нових принципів: Мінімальна складність; Єдина відповідальність класу; Імітація
+  зовнішніх операцій; Командний рядок і відсутність зовнішніх залежностей;
+  Впровадження залежностей; Мова програмних елементів і коментарів;
+  Текстові UML-діаграми; Специфікація українською мовою.
+Added sections: Межі застосунку та технологічні обмеження; Мова й документація.
+Removed sections: немає.
+Follow-up TODOs: none.
+-->
+# Конституція навчального Java-застосунку «Служба доставки їжі»
 
-## Core Principles
+## Основні принципи
 
-### [PRINCIPLE_1_NAME]
-<!-- Example: I. Library-First -->
-[PRINCIPLE_1_DESCRIPTION]
-<!-- Example: Every feature starts as a standalone library; Libraries must be self-contained, independently testable, documented; Clear purpose required - no organizational-only libraries -->
+### I. Мінімальна складність
+Архітектурні та програмні рішення MUST бути найпростішими з тих, що повністю
+задовольняють вимоги. Не додавати абстракції, залежності чи функціональність без
+обґрунтованої потреби; будь-яке відхилення від мінімального рішення MUST мати
+пояснення. Це підтримує навчальну мету та полегшує розуміння коду.
 
-### [PRINCIPLE_2_NAME]
-<!-- Example: II. CLI Interface -->
-[PRINCIPLE_2_DESCRIPTION]
-<!-- Example: Every library exposes functionality via CLI; Text in/out protocol: stdin/args → stdout, errors → stderr; Support JSON + human-readable formats -->
+### II. Єдина відповідальність класу
+Кожен клас MUST мати одну чітко визначену відповідальність. Зміни, потрібні з
+різних причин, MUST належати окремим класам, якщо це не створює невиправданої
+складності. Відповідальність класу MUST бути зрозумілою з його назви та призначення.
 
-### [PRINCIPLE_3_NAME]
-<!-- Example: III. Test-First (NON-NEGOTIABLE) -->
-[PRINCIPLE_3_DESCRIPTION]
-<!-- Example: TDD mandatory: Tests written → User approved → Tests fail → Then implement; Red-Green-Refactor cycle strictly enforced -->
+### III. Імітація зовнішніх операцій
+Методи, що представляють зовнішню дію, MUST замість реального виконання цієї дії
+виводити до консолі зрозуміле повідомлення про неї. Це правило поширюється,
+зокрема, на оформлення доставки та взаємодію із зовнішніми системами.
 
-### [PRINCIPLE_4_NAME]
-<!-- Example: IV. Integration Testing -->
-[PRINCIPLE_4_DESCRIPTION]
-<!-- Example: Focus areas requiring integration tests: New library contract tests, Contract changes, Inter-service communication, Shared schemas -->
+### IV. Командний рядок і відсутність зовнішніх залежностей
+Компіляція та запуск застосунку MUST виконуватися з командного рядка. На цьому
+етапі застосунок MUST NOT підключатися до зовнішніх сервісів або баз даних.
+Інструкції з компіляції та запуску MUST бути придатні для виконання з командного
+рядка.
 
-### [PRINCIPLE_5_NAME]
-<!-- Example: V. Observability, VI. Versioning & Breaking Changes, VII. Simplicity -->
-[PRINCIPLE_5_DESCRIPTION]
-<!-- Example: Text I/O ensures debuggability; Structured logging required; Or: MAJOR.MINOR.BUILD format; Or: Start simple, YAGNI principles -->
+### V. Впровадження залежностей
+Залежності MUST передаватися об’єктам лише через конструктори або setter-методи.
+Використання статичних методів для впровадження залежностей MUST NOT допускатися.
 
-## [SECTION_2_NAME]
-<!-- Example: Additional Constraints, Security Requirements, Performance Standards, etc. -->
+### VI. Мова програмних елементів і коментарів
+Назви класів, методів, атрибутів та інших програмних елементів MUST бути
+англійською мовою. Коментарі в коді та пояснення до нього MUST бути українською
+мовою.
 
-[SECTION_2_CONTENT]
-<!-- Example: Technology stack requirements, compliance standards, deployment policies, etc. -->
+### VII. Текстові UML-діаграми
+UML-діаграми MUST зберігатися в каталозі `docs` у текстовому форматі, придатному
+для перегляду та версійного контролю.
 
-## [SECTION_3_NAME]
-<!-- Example: Development Workflow, Review Process, Quality Gates, etc. -->
+### VIII. Специфікація українською мовою
+Специфікаційні документи проєкту MUST вестися українською мовою. Назви
+програмних елементів у прикладах коду при цьому залишаються англійською.
 
-[SECTION_3_CONTENT]
-<!-- Example: Code review requirements, testing gates, deployment approval process, etc. -->
+## Межі застосунку та технологічні обмеження
 
-## Governance
-<!-- Example: Constitution supersedes all other practices; Amendments require documentation, approval, migration plan -->
+Застосунок є навчальною інформаційною системою для предметної області «Служба
+доставки їжі». Реальна обробка замовлень, платежів, доставок, збереження даних
+або обмін із зовнішніми сервісами не входять до поточного обсягу: відповідна
+поведінка імітується консольними повідомленнями. Нові технологічні залежності
+додаються лише за обґрунтованої потреби та з дотриманням цієї конституції.
 
-[GOVERNANCE_RULES]
-<!-- Example: All PRs/reviews must verify compliance; Complexity must be justified; Use [GUIDANCE_FILE] for runtime development guidance -->
+## Мова й документація
 
-**Version**: [CONSTITUTION_VERSION] | **Ratified**: [RATIFICATION_DATE] | **Last Amended**: [LAST_AMENDED_DATE]
-<!-- Example: Version: 2.1.1 | Ratified: 2025-06-13 | Last Amended: 2025-07-16 -->
+Специфікації та пояснювальні матеріали ведуться українською. Ідентифікатори
+програмного коду — англійською, а коментарі до коду — українською. Текстові
+джерела UML-діаграм розміщуються в `docs`.
+
+## Управління
+
+Ця конституція визначає обов’язкові принципи проєкту й має перевагу над
+суперечливими локальними домовленостями. Зміни до неї MUST бути задокументовані
+в цій версії файлу та перевірені на узгодженість із наявними принципами й
+навчальними межами проєкту. Під час перевірки змін коду MUST оцінюватися
+дотримання кожного застосовного принципу; складність або відхилення від
+принципу MUST бути явно обґрунтовані.
+
+Версію конституції MUST змінювати за семантичними правилами: MAJOR — несумісна
+зміна чи вилучення принципу; MINOR — додавання принципу або суттєве розширення
+вимог; PATCH — уточнення, що не змінює змісту вимог. Після ухвалення зміни
+оновлюється дата останнього внесення змін.
+
+**Версія**: 1.0.0 | **Ухвалено**: 2026-10-24 | **Останні зміни**: 2026-10-24
