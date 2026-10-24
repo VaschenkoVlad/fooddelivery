@@ -15,7 +15,8 @@ stateDiagram-v2
     ReadyForPickup --> PickupFailed: кур'єр не може забрати / reportObstacle(reason)
     ReadyForPickup --> InTransit: кур'єр забрав / start()
     InTransit --> InTransit: оновити статус / updateStatus(status)
-    InTransit --> InTransit: перешкода / повідомити замовника, не завершувати доставку
+    InTransit --> InTransit: перешкода / повідомити замовника, залишити статус незавершеним
+    InTransit --> InTransit: перешкоду усунуто / updateStatus("InTransit")
     InTransit --> Delivered: замовлення передано замовнику / complete()
 
     Delivered --> [*]
@@ -31,4 +32,9 @@ stateDiagram-v2
     note right of PickupFailed
         Не є успішною доставкою;
         Review створити не можна.
+    end note
+
+    note right of InTransit
+        Після перешкоди Delivered можливий
+        лише після окремого відновлення доставки.
     end note

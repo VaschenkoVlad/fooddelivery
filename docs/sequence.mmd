@@ -8,43 +8,75 @@ sequenceDiagram
     participant mapping as MappingService
     participant review as Review
 
-    customer->>order: Order(id, customer, restaurant, requestedDeliveryTime)
-    customer->>order: addItem(dishName, quantity)
-    customer->>order: submit()
-    alt Кошик порожній або час недоступний
-        order-->>customer: Відмовити в оформленні та пояснити причину
+    Note over customer: До створення Order система перевіряє кошик, доступність позицій і час доставки
+    customer->>customer: Перевірити кошик і вибраний час
+    alt Кошик порожній
+        customer-->>customer: Відмовити в оформленні та попросити додати позицію
+    else Час минув або недоступний
+        customer-->>customer: Відмовити в оформленні та попросити вибрати інший час
     else Кошик і час коректні
-        order->>restaurant: confirmOrder(order)
-        alt Ресторан відхиляє замовлення
-            restaurant->>order: reject(reason)
-            order-->>customer: Повідомити про відхилення
-        else Ресторан підтверджує замовлення
-            restaurant->>order: confirm()
-            Note over restaurant,order: Замовлення переходить у Preparing
-            restaurant->>restaurant: markReady(order)
-            restaurant->>delivery: Delivery(id, order, mapping)
-            courier->>courier: acceptDelivery(delivery)
-            alt Кур'єр не може забрати замовлення
-                courier->>delivery: reportObstacle(reason)
-                delivery-->>customer: PickupFailed — замовлення не доставлено
-            else Кур'єр забирає замовлення
-                courier->>delivery: start()
-                delivery->>mapping: getRouteDetails(origin, destination)
-                Note over delivery,mapping: Маршрут імітується, зовнішнього з'єднання немає
-                mapping-->>delivery: Імітовані відомості маршруту
-                loop Оновлення перебігу доставки
-                    courier->>courier: updateDeliveryStatus(status)
-                    courier->>delivery: updateStatus(status)
-                    delivery-->>customer: Поточний статус для відстеження
-                end
-                opt Перешкода під час доставки
+        loop Для кожної позиції кошика
+            customer->>customer: Перевірити доступність позиції
+        end
+        alt Є недоступна позиція
+            customer-->>customer: Відмовити в оформленні та назвати недоступну позицію
+        else Усі позиції доступні
+            customer->>order: Order(id, customer, restaurant, requestedDeliveryTime)
+            customer->>order: addItem(dishName, quantity)
+            customer->>order: submit()
+            order->>restaurant: confirmOrder(order)
+            alt Ресторан відхиляє замовлення
+                restaurant->>order: reject(reason)
+                order-->>customer: Повідомити причину відхилення
+            else Ресторан підтверджує замовлення
+                restaurant->>order: confirm()
+                Note over restaurant,order: Замовлення переходить у Preparing
+                restaurant->>restaurant: markReady(order)
+                restaurant->>delivery: Delivery(id, order, mapping)
+                courier->>courier: acceptDelivery(delivery)
+                alt Кур'єр не може забрати замовлення
                     courier->>delivery: reportObstacle(reason)
-                    delivery-->>customer: Повідомити про перешкоду та не позначати як Delivered
+                    delivery-->>customer: PickupFailed — замовлення не доставлено
+                else Кур'єр забирає замовлення
+                    courier->>delivery: start()
+                    delivery->>mapping: getRouteDetails(origin, destination)
+                    Note over delivery,mapping: Маршрут імітується, зовнішнього з'єднання немає
+                    mapping-->>delivery: Імітовані відомості маршруту
+                    loop Оновлення перебігу доставки
+                        courier->>courier: updateDeliveryStatus(status)
+                        courier->>delivery: updateStatus(status)
+                        delivery-->>customer: Поточний статус для відстеження
+                    end
+                    alt Перешкода під час доставки
+                        courier->>delivery: reportObstacle(reason)
+                        delivery-->>customer: Повідомити про перешкоду, статус не Delivered
+                        alt Перешкоду усунуто
+                            courier->>delivery: updateStatus("InTransit")
+                            Note over courier,delivery: Завершення можливе лише після окремого відновлення доставки
+                            courier->>delivery: complete()
+                            delivery-->>customer: Delivered
+                        else Перешкоду не усунуто
+                            delivery-->>customer: Залишити доставку незавершеною, не надсилати Delivered
+                        end
+                    else Перешкод немає
+                        courier->>delivery: complete()
+                        delivery-->>customer: Delivered
+                    end
                 end
-                courier->>delivery: complete()
-                delivery-->>customer: Delivered
-                customer->>review: Review(id, customer, delivery, rating, comment)
-                Note over customer,review: Відгук лише після Delivered, оцінка — ціле число від 1 до 5
             end
         end
+    end
+
+    alt Доставку завершено (Delivered)
+        customer->>customer: Перевірити оцінку 1–5 і відсутність попереднього відгуку
+        alt Оцінка поза діапазоном 1–5
+            customer-->>customer: Відхилити відгук і пояснити допустимий діапазон
+        else Відгук для доставки вже існує
+            customer-->>customer: Відхилити повторний відгук і повідомити про правило одного відгуку
+        else Оцінка коректна, відгуку ще немає
+            customer->>review: Review(id, customer, delivery, rating, comment)
+            review-->>customer: Підтвердити прийняття відгуку
+        end
+    else Доставку не завершено
+        customer->>customer: Відхилити відгук і пояснити, що він дозволений лише після Delivered
     end
