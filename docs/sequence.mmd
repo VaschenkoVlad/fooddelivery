@@ -33,8 +33,8 @@ sequenceDiagram
                 Note over delivery,mapping: Маршрут імітується, зовнішнього з'єднання немає
                 mapping-->>delivery: Імітовані відомості маршруту
                 loop Оновлення перебігу доставки
-                    courier->>delivery: updateDeliveryStatus(status)
-                    delivery->>delivery: updateStatus(status)
+                    courier->>courier: updateDeliveryStatus(status)
+                    courier->>delivery: updateStatus(status)
                     delivery-->>customer: Поточний статус для відстеження
                 end
                 opt Перешкода під час доставки
