@@ -13,7 +13,10 @@ stateDiagram-v2
     Accepted --> Preparing: ресторан почав приготування
     Preparing --> ReadyForPickup: ресторан позначив замовлення готовим
     ReadyForPickup --> PickupFailed: кур'єр не може забрати / reportObstacle(reason)
-    ReadyForPickup --> InTransit: кур'єр забрав / start()
+    ReadyForPickup --> AwaitingCourier: не вдалося призначити кур'єра / повідомити замовника
+    ReadyForPickup --> InTransit: кур'єра призначено, він забрав замовлення / start()
+    AwaitingCourier --> AwaitingCourier: повторна спроба призначення / залишити замовлення незавершеним
+    AwaitingCourier --> InTransit: кур'єра призначено, він забрав замовлення / start()
     InTransit --> InTransit: оновити статус / updateStatus(status)
     InTransit --> InTransit: перешкода / повідомити замовника, залишити статус незавершеним
     InTransit --> InTransit: перешкоду усунуто / updateStatus("InTransit")
@@ -37,4 +40,10 @@ stateDiagram-v2
     note right of InTransit
         Після перешкоди Delivered можливий
         лише після окремого відновлення доставки.
+    end note
+
+    note right of AwaitingCourier
+        Зрозумілий незавершальний статус:
+        кур'єра ще не призначено.
+        Після призначення та забору доставка триває.
     end note
