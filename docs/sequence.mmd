@@ -8,6 +8,8 @@ sequenceDiagram
     participant delivery as Delivery
     participant mapping as MappingService
     participant review as Review
+    participant orderStatus as OrderStatus
+    participant basketItem as BasketItem
 
     Note over main,review: Main по черзі запускає 4 сценарії: 1 успішний, 2 порожній кошик, 3 відхилення рестораном, 4 неможливість забору
     main->>customer: Customer(id, name, address)
@@ -22,19 +24,25 @@ sequenceDiagram
     opt Сценарій 1
         main->>order: addItem(dishName, quantity)
     end
+    opt Сценарій 1
+        main->>order: getItems()
+        main->>basketItem: getDishName()
+        main->>basketItem: getQuantity()
+        main->>basketItem: getUnitPrice()
+        main->>order: getRequestedDeliveryTime()
+    end
     main->>customer: placeOrder(order)
     customer->>order: submit()
     Note over order: Подати можна лише непорожній кошик із часом HH:mm від 10:00 до 22:00
 
     alt Сценарій 2: кошик порожній
-        order-->>customer: Пояснення причини
         main->>order: getStatus()
-        order-->>main: Draft
+        main->>orderStatus: getDisplayName()
     else Сценарій 3: ресторан відхиляє замовлення
         main->>restaurant: rejectOrder(order, reason)
         restaurant->>order: reject(reason)
         main->>order: getStatus()
-        order-->>main: Rejected
+        main->>orderStatus: getDisplayName()
     else Сценарії 1 і 4: ресторан підтверджує замовлення
         main->>restaurant: confirmOrder(order)
         restaurant->>order: confirm()
@@ -52,12 +60,11 @@ sequenceDiagram
             main->>delivery: reportObstacle(reason)
             delivery->>order: markPickupFailed()
             main->>order: getStatus()
-            order-->>main: PickupFailed
+            main->>orderStatus: getDisplayName()
         else Сценарій 1: кур'єр забирає замовлення
             main->>delivery: start()
             delivery->>order: markInTransit()
             delivery->>mapping: getRouteDetails(origin, destination)
-            mapping-->>delivery: Імітований маршрут без мережі
             main->>courier: updateDeliveryStatus(status)
             courier->>delivery: updateStatus(status)
             main->>delivery: complete()
@@ -65,6 +72,5 @@ sequenceDiagram
             main->>customer: submitReview(delivery, rating, comment)
             customer->>review: Review(id, customer, delivery, rating, comment)
             review->>delivery: registerReview(review)
-            review-->>customer: Відгук прийнято
         end
     end

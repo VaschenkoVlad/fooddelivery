@@ -17,6 +17,7 @@ classDiagram
         Rejected
         Cancelled
         PickupFailed
+        +getDisplayName() String
     }
 
     class DeliveryStatus {
@@ -194,6 +195,7 @@ classDiagram
     Main ..> BasketItem : створює
     Main ..> Delivery : створює
     Main ..> MappingService : створює
+    Main ..> OrderStatus : показує стан
 
     note for DeliveryParticipant "getId() і getName() є final. Customer, Courier і PartnerRestaurant перевизначають getDeliveryStatus()."
     note for Order "addItem(item) та addItem(dishName, quantity) — перевантажені варіанти. Подати можна лише непорожній кошик із часом HH:mm від 10:00 до 22:00."

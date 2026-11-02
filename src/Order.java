@@ -39,7 +39,7 @@ public final class Order {
 
     public void submit() {
         if (status != OrderStatus.Draft) {
-            System.out.println("Замовлення не можна подати зі стану " + status + ".");
+            System.out.println("Замовлення не можна подати зі стану " + status.getDisplayName() + ".");
             return;
         }
         if (items.isEmpty()) {

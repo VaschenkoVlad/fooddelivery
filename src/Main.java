@@ -18,6 +18,13 @@ public final class Main {
                 .addItem(new BasketItem("Борщ", 1, 150.0))
                 .addItem("Вареники", 2);
 
+        System.out.println("Позиції кошика:");
+        for (BasketItem item : order.getItems()) {
+            System.out.println(" - " + item.getDishName() + ": " + item.getQuantity()
+                    + " шт. × " + item.getUnitPrice() + " грн");
+        }
+        System.out.println("Обраний час доставки: " + order.getRequestedDeliveryTime() + ".");
+
         customer.placeOrder(order);
         restaurant.confirmOrder(order);
         restaurant.startPreparing(order);
@@ -37,7 +44,7 @@ public final class Main {
         PartnerRestaurant restaurant = new PartnerRestaurant("R-002", "Кафе «Дім»");
         Order order = new Order("O-002", customer, restaurant, "19:00");
         customer.placeOrder(order);
-        System.out.println("Поточний стан замовлення: " + order.getStatus() + ".");
+        System.out.println("Поточний стан замовлення: " + order.getStatus().getDisplayName() + ".");
     }
 
     private static void demonstrateRestaurantRejection() {
@@ -48,7 +55,7 @@ public final class Main {
                 .addItem(new BasketItem("Піца", 1, 280.0));
         customer.placeOrder(order);
         restaurant.rejectOrder(order, "Страва тимчасово недоступна.");
-        System.out.println("Поточний стан замовлення: " + order.getStatus() + ".");
+        System.out.println("Поточний стан замовлення: " + order.getStatus().getDisplayName() + ".");
     }
 
     private static void demonstratePickupFailure() {
@@ -66,7 +73,7 @@ public final class Main {
         Delivery delivery = new Delivery("DEL-004", order, new MappingService());
         courier.acceptDelivery(delivery);
         delivery.reportObstacle("Транспорт кур'єра несправний");
-        System.out.println("Поточний стан замовлення: " + order.getStatus() + ".");
+        System.out.println("Поточний стан замовлення: " + order.getStatus().getDisplayName() + ".");
     }
 
     private static void printScenario(String title) {
