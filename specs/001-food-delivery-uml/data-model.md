@@ -10,7 +10,7 @@
 | `Customer` | `address`; `placeOrder(order)`; `submitReview(delivery, rating, comment)`; конструктор `Customer(id, name, address)` | Формує й надсилає замовлення, переглядає статус та залишає відгук лише після успішної доставки. Перевизначає `getDeliveryStatus()`. |
 | `Courier` | `availability`; `acceptDelivery(delivery)`; `updateDeliveryStatus(status)`; конструктор `Courier(id, name, availability)` | Приймає готове замовлення, оновлює перебіг доставки та фіксує неможливість забору/перешкоду. Перевизначає `getDeliveryStatus()`. |
 | `PartnerRestaurant` | `confirmOrder(order)`, `rejectOrder(order, reason)`, `markReady(order)`; конструктор `PartnerRestaurant(id, name)` | Підтверджує або відхиляє замовлення, відмічає готовність. Перевизначає `getDeliveryStatus()`. |
-| `Order` | `id`, `requestedDeliveryTime`, `status`, `items`; `addItem(item)`, `submit()`, `confirm()`, `reject(reason)`; конструктор `Order(id, customer, restaurant, requestedDeliveryTime)` | Містить одну чи більше позицій, належить одному ресторану й проходить послідовні стани. Не може бути оформлене з порожнім кошиком або недійсним часом. |
+| `Order` | `id`, `requestedDeliveryTime`, `status`, `items`; `addItem(item)`, `submit()`, `confirm()`, `startPreparing()`, `reject(reason)`; конструктор `Order(id, customer, restaurant, requestedDeliveryTime)` | Містить одну чи більше позицій, належить одному ресторану й проходить послідовні стани. Не може бути оформлене з порожнім кошиком або недійсним часом. |
 | `BasketItem` | `dishName`, `quantity`, `unitPrice`; конструктор `BasketItem(dishName, quantity, unitPrice)` | Окрема доступна страва й кількість; входить до складу рівно одного `Order`. `quantity` є додатним числом. |
 | `Delivery` | `status`, `trackingDetails`; `start()`, `updateStatus(status)`, `complete()`, `reportObstacle(reason)`; конструктор `Delivery(id, order, mappingService)` | Відповідає за виконання та відстеження доставки замовлення. Отримує `MappingService` через конструктор; маршрут лише імітується. |
 | `MappingService` | `getRouteDetails(origin, destination)`; конструктор `MappingService()` | Надає імітовані маршрутні відомості; не встановлює зовнішнє з'єднання. |
@@ -26,6 +26,7 @@
 - `Order` композиційно містить одну або більше `BasketItem`.
 - `Order` пов'язане з одним `Customer`, одним `PartnerRestaurant` і однією `Delivery`.
 - `Delivery` призначене одному `Courier` після підтвердження замовлення та позначення його готовим; `Delivery` залежить від `MappingService`.
+- `Customer` залежить від `Delivery`: отримує її в `submitReview(delivery, rating, comment)`.
 - `Review` належить одній `Delivery` і одному `Customer`; для завершеної доставки допускається не більше одного відгуку.
 - Повторні або недоречні події статусу не створюють суперечливих переходів.
 

@@ -47,6 +47,7 @@ classDiagram
         +addItem(dishName: String, quantity: int) Order
         +submit() void
         +confirm() void
+        +startPreparing() void
         +reject(reason: String) void
     }
 
@@ -87,6 +88,7 @@ classDiagram
 
     Order "1" *-- "1..*" BasketItem : містить
     Customer "1" --> "0..*" Order : оформлює
+    Customer ..> Delivery : оцінює
     PartnerRestaurant "1" --> "0..*" Order : опрацьовує
     Order "1" --> "1" Delivery : має доставку
     Delivery "0..*" --> "1" Courier : призначено

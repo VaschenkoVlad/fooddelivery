@@ -35,8 +35,8 @@ sequenceDiagram
                     restaurant->>order: confirm()
                     order-->>restaurant: Ігнорувати повтор, стан Accepted не змінюється
                 end
-                restaurant->>order: Подія початку приготування
-                Note over restaurant,order: Після окремої події початку замовлення переходить у Preparing
+                restaurant->>order: startPreparing()
+                Note over restaurant,order: Після startPreparing() замовлення переходить у Preparing
                 restaurant->>restaurant: markReady(order)
                 opt Повторно надійшла подія готовності
                     restaurant->>restaurant: markReady(order)

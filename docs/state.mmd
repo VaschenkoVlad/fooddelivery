@@ -11,7 +11,7 @@ stateDiagram-v2
     Submitted --> Cancelled: замовник скасував
 
     Accepted --> Accepted: повторний confirm() / ігнорувати, стан без змін
-    Accepted --> Preparing: ресторан почав приготування
+    Accepted --> Preparing: ресторан почав приготування / startPreparing()
     Preparing --> ReadyForPickup: ресторан позначив замовлення готовим
     ReadyForPickup --> ReadyForPickup: повторний markReady() / ігнорувати, стан без змін
     ReadyForPickup --> PickupFailed: кур'єр не може забрати / reportObstacle(reason)
