@@ -21,21 +21,22 @@ public final class Delivery {
         order.attachDelivery(this);
     }
 
-    void assignCourier(Courier assignedCourier) {
+    boolean assignCourier(Courier assignedCourier) {
         Objects.requireNonNull(assignedCourier, "Кур'єр не може бути null.");
         if (status == DeliveryStatus.Delivered || status == DeliveryStatus.PickupFailed) {
             System.out.println("До завершеної доставки не можна призначити кур'єра.");
-            return;
+            return false;
         }
         if (courier != null && courier != assignedCourier) {
             throw new IllegalStateException("Для доставки вже призначено іншого кур'єра.");
         }
         if (courier == assignedCourier) {
-            return;
+            return true;
         }
         courier = assignedCourier;
         trackingDetails = "Кур'єра призначено: " + assignedCourier.getName() + ".";
         System.out.println(trackingDetails);
+        return true;
     }
 
     public void start() {

@@ -19,7 +19,9 @@ public final class Courier extends DeliveryParticipant implements IDeliveryStatu
         if (assignedDelivery != null && assignedDelivery != delivery) {
             throw new IllegalStateException("Кур'єр уже призначений для іншої доставки.");
         }
-        delivery.assignCourier(this);
+        if (!delivery.assignCourier(this)) {
+            return;
+        }
         assignedDelivery = delivery;
         System.out.println(getName() + " прийняв доставку.");
     }
