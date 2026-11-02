@@ -3,25 +3,26 @@ stateDiagram-v2
     [*] --> Draft: створити замовлення
 
     Draft --> Submitted: кошик не порожній і час доступний / submit()
-    Draft --> Cancelled: скасувати замовлення
+    Draft --> Cancelled: скасувати замовлення / cancel()
     Draft --> Draft: порожній кошик або недоступний час / показати пояснення
 
     Submitted --> Accepted: ресторан підтвердив / confirm()
     Submitted --> Rejected: ресторан відхилив / reject(reason)
-    Submitted --> Cancelled: замовник скасував
+    Submitted --> Cancelled: замовник скасував / cancel()
 
     Accepted --> Accepted: повторний confirm() / ігнорувати, стан без змін
     Accepted --> Preparing: ресторан почав приготування / startPreparing()
-    Preparing --> ReadyForPickup: ресторан позначив замовлення готовим
+    Preparing --> ReadyForPickup: ресторан позначив замовлення готовим / markReady()
     ReadyForPickup --> ReadyForPickup: повторний markReady() / ігнорувати, стан без змін
     ReadyForPickup --> PickupFailed: кур'єр не може забрати / reportObstacle(reason)
-    ReadyForPickup --> AwaitingCourier: не вдалося призначити кур'єра / повідомити замовника
+    ReadyForPickup --> AwaitingCourier: кур'єр недоступний / acceptDelivery(delivery)
     ReadyForPickup --> InTransit: кур'єра призначено, він забрав замовлення / start()
     AwaitingCourier --> AwaitingCourier: повторна спроба призначення / залишити замовлення незавершеним
     AwaitingCourier --> InTransit: кур'єра призначено, він забрав замовлення / start()
+    AwaitingCourier --> PickupFailed: кур'єр не може забрати / reportObstacle(reason)
     InTransit --> InTransit: повторний start() / ігнорувати, стан без змін
     InTransit --> InTransit: оновити статус / updateStatus(status)
-    InTransit --> InTransit: перешкода / повідомити замовника, залишити статус незавершеним
+    InTransit --> InTransit: перешкода / reportObstacle(reason), Delivered заблоковано
     InTransit --> InTransit: перешкоду усунуто / updateStatus("InTransit")
     InTransit --> Delivered: замовлення передано замовнику / complete()
 
@@ -50,4 +51,10 @@ stateDiagram-v2
         Зрозумілий незавершальний статус:
         кур'єра ще не призначено.
         Після призначення та забору доставка триває.
+    end note
+
+    note left of Draft
+        Стан замовлення зберігається як OrderStatus.
+        Delivery має окремий DeliveryStatus:
+        AwaitingCourier, InTransit, Delivered, PickupFailed.
     end note

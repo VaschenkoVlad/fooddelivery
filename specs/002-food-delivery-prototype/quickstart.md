@@ -5,9 +5,10 @@
 ## Компіляція та запуск
 
 ```powershell
+$OutputEncoding = [Console]::OutputEncoding = [System.Text.UTF8Encoding]::new()
 $sources = Get-ChildItem .\src -Filter *.java | ForEach-Object { $_.FullName }
 javac --release 17 -encoding UTF-8 -d .\out $sources
-java -cp .\out Main
+java "-Dfile.encoding=UTF-8" -cp .\out Main
 ```
 
 Очікується успішна компіляція й завершення одного автоматичного запуску. Тимчасові `.class`-файли з'являються в `out`; їх не слід додавати до репозиторію.

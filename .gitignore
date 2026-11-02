@@ -4,6 +4,7 @@ target/
 *.jar
 .gradle/
 build/
+out/
 
 # Тимчасові та локальні файли
 .DS_Store

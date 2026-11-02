@@ -7,22 +7,23 @@
 | Тип | Дані й операції | Відповідальність та обмеження |
 |---|---|---|
 | `IDeliveryStatus` (інтерфейс) | `getDeliveryStatus()` | Контракт читання статусу для `Customer`, `Courier` і `PartnerRestaurant`. |
-| `DeliveryParticipant` (абстрактний клас) | `id`, `name`; `getId()`, `getDeliveryStatus()` | Спільні дані учасника. `getId()` є `final`; конкретні учасники перевизначають `getDeliveryStatus()`. |
+| `DeliveryParticipant` (абстрактний клас) | `id`, `name`; `getId()`, `getName()`, `getDeliveryStatus()` | Спільні дані учасника. `getId()` і `getName()` є `final`; конкретні учасники перевизначають `getDeliveryStatus()`. |
 | `Customer` | `address`; `placeOrder(order)`, `submitReview(delivery, rating, comment)` | Ініціює оформлення, бачить статус і створює відгук лише після завершення доставки. |
 | `Courier` | `availability`; `acceptDelivery(delivery)`, `updateDeliveryStatus(status)` | Приймає призначену доставку та повідомляє про перебіг або неможливість забору. |
-| `PartnerRestaurant` | `confirmOrder(order)`, `rejectOrder(order, reason)`, `markReady(order)` | Підтверджує/відхиляє замовлення й позначає його готовим. |
-| `Order` | `id`, `requestedDeliveryTime`, `status`, список `BasketItem`; `addItem(item)`, `addItem(dishName, quantity)`, `submit()`, `confirm()`, `startPreparing()`, `reject(reason)` | Перевіряє можливість оформлення, зберігає замовника, ресторан, час і позиції; має одну чи більше позицій для подання. Недоступний час або порожній кошик не переводять його в `Submitted`. |
+| `PartnerRestaurant` | `confirmOrder(order)`, `rejectOrder(order, reason)`, `startPreparing(order)`, `markReady(order)` | Підтверджує/відхиляє замовлення, починає його приготування й позначає готовим. |
+| `Order` | `id`, `requestedDeliveryTime`, типізований `OrderStatus`, список `BasketItem`; `addItem(item)`, `addItem(dishName, quantity)`, `submit()`, `confirm()`, `startPreparing()`, `markReady()`, `reject(reason)`, `cancel()` | Перевіряє можливість оформлення, зберігає замовника, ресторан, час, позиції та одну доставку. Обидві перевантажені форми додають позицію; форма без ціни використовує демонстраційну ціну 100.00. Порожній кошик або недоступний час не переводять його в `Submitted`. |
 | `BasketItem` | `dishName`, `quantity`, `unitPrice` | Одна позиція замовлення; кількість і ціна мають бути допустимими додатними значеннями. |
-| `Delivery` | `status`, `trackingDetails`; `start()`, `updateStatus(status)`, `complete()`, `reportObstacle(reason)` | Керує життєвим циклом доставки, перебігом і перешкодами. Отримує `MappingService` через конструктор. |
+| `Delivery` | типізований `DeliveryStatus`, `trackingDetails`; `assignCourier(courier)`, `start()`, `updateStatus(status)`, `complete()`, `reportObstacle(reason)` | Керує життєвим циклом доставки, перебігом, призначенням кур'єра, перешкодами та одним відгуком. Отримує `MappingService` через конструктор. |
 | `MappingService` | `getRouteDetails(origin, destination)` | Локально формує відомості маршруту та повідомляє, що маршрут імітовано; не викликає мережу. |
 | `Review` | `rating`, `comment` | Відображає один відгук замовника на доставку зі статусом `Delivered`; рейтинг — ціле число від 1 до 5 включно. |
 | `Main` (запускний компонент) | Точка входу `main` і сценарна оркестрація | Створює об'єкти й послідовно виконує один успішний сценарій та три визначені невдалі сценарії. Не переносить до себе правила станів предметних класів. Має бути доданий до `docs/class.mmd` і отримати одну CRC-картку. |
 
 ## Зв'язки
 
-- `Customer`, `Courier` та `PartnerRestaurant` наслідують `DeliveryParticipant` і реалізують `IDeliveryStatus`.
-- `Order` композиційно містить одну або більше `BasketItem`; замовлення пов'язане з одним `Customer` та одним `PartnerRestaurant`.
-- `Delivery` належить одному `Order`, може бути призначена одному `Courier` і залежить від переданого їй `MappingService`.
+- `Customer`, `Courier` та `PartnerRestaurant` наслідують `DeliveryParticipant` і реалізують `IDeliveryStatus`; сам `DeliveryParticipant` теж реалізує цей інтерфейс абстрактним методом.
+- `OrderStatus` типізує стани замовлення; `DeliveryStatus` типізує стани самої доставки. Стани ролей повертаються контрактом `IDeliveryStatus` як україномовний текст.
+- `Order` композиційно містить `BasketItem` (у чернетці кошик може бути порожнім, подати можна лише непорожній); замовлення зберігає посилання на одного `Customer` та одного `PartnerRestaurant`.
+- `Delivery` належить одному `Order`, може бути призначена одному `Courier` і зберігає переданий їй через конструктор `MappingService` (асоціація).
 - `Customer` створює `Review` для `Delivery`; кожна успішна доставка має не більше одного відгуку.
 - `Main` залежить від предметних класів лише для запуску демонстрації.
 - Залежності передаються конструкторами або setter-методами; статичне впровадження залежностей не використовується.
@@ -39,7 +40,7 @@
 | `Accepted` | початок приготування | `Preparing` | Інші стани не повинні імітувати початок приготування. |
 | `Preparing` | замовлення готове | `ReadyForPickup` | Повторний `markReady()` лишає стан без змін. |
 | `ReadyForPickup` | кур'єра ще не призначено | `AwaitingCourier` | Незавершений стан; призначення може бути повторене. |
-| `ReadyForPickup` | забору не буде | `PickupFailed` | Невдалий завершальний стан; це не `Delivered`. |
+| `ReadyForPickup` або `AwaitingCourier` | забору не буде | `PickupFailed` | Невдалий завершальний стан; це не `Delivered`. |
 | `ReadyForPickup` або `AwaitingCourier` | призначений кур'єр забирає замовлення | `InTransit` | Початок доставки допускається лише у визначених діаграмою умовах. |
 | `InTransit` | оновлення статусу або перешкода | `InTransit` | Перешкода повідомляється; статус не стає `Delivered`. |
 | `InTransit` | доставка успішно завершена | `Delivered` | Повторне `complete()` не змінює статус. |
